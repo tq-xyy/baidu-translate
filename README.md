@@ -8,9 +8,19 @@
 * 相对于同类开源项目而言, sign 算法采用 Python 重新编写, 无需额外的依赖和调用开销。
 * 得益于缓存机制，首次调用可能稍慢，但后续调用相当之快。
 
+## Demo
+
+```python
+import baidu_translate
+result = baidu_translate.v2transapi('Hello, World!', 'en', 'zh')
+print(result)
+# 你好，世界！
+```
+
 ## API
 
 翻译 API 接口请参见 [api.py](https://github.com/17097231932/baidu-translate/blob/main/baidu_translate/api.py), 源代码简洁易懂欢迎阅读。
+翻译语种请参见[百度官方文档](https://fanyi-api.baidu.com/doc/21), 请不要乱填。
 
 ```python
 
