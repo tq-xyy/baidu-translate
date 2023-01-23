@@ -25,10 +25,7 @@ def _fetch_gtk_and_token():
 
     token = re.search(r"token: *'(.+?)',?", response2.text)[1]
 
-    return {
-        'gtk': gtk,
-        'token': token
-    }
+    return gtk, token
 
 
 def langdectet(content: str) -> str:
@@ -40,7 +37,7 @@ def langdectet(content: str) -> str:
 
 
 def v2transapi(content: str, fromLang: Lang, toLang: Lang, domain: Domain) -> dict:
-    tokens = _fetch_gtk_and_token()
+    gtk, token = _fetch_gtk_and_token()
 
     data = {
         'from': fromLang.value,
@@ -48,8 +45,8 @@ def v2transapi(content: str, fromLang: Lang, toLang: Lang, domain: Domain) -> di
         'query': content,
         'transtype': 'translang',
         'simple_means_flag': 3,
-        'sign': sign(content, tokens['gtk']),
-        'token': tokens['token'],
+        'sign': sign(content, gtk),
+        'token': token,
         'domain': domain.value,
     }
 

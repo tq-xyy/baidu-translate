@@ -8,7 +8,9 @@ from .languages import Lang, lang_from_string
 __all__ = ['translate_text', 'detect_language', 'Domain', 'Lang']
 
 # We place the function here because it need call api to detect language.
-def normalize_language(content, fromLang, toLang):
+
+
+def _normalize_language(content, fromLang, toLang):
     if not isinstance(fromLang, Lang):
         fromLang = lang_from_string(fromLang)
     if not isinstance(toLang, Lang):
@@ -20,17 +22,17 @@ def normalize_language(content, fromLang, toLang):
         toLang = Lang.EN if fromLang == Lang.ZH else Lang.ZH
 
     return fromLang, toLang
-    
+
 
 def translate_text(
     content: str, /,
-    from_: Union[str, Lang] =Lang.AUTO, to:Union[str, Lang]=Lang.AUTO,
+    from_: Union[str, Lang] = Lang.AUTO, to: Union[str, Lang] = Lang.AUTO,
     domain: Domain = Domain.COMMON
 ) -> str:
     if not content:
         return content
 
-    from_, to = normalize_language(content, from_, to)
+    from_, to = _normalize_language(content, from_, to)
     if from_ == to:
         return content
 
@@ -40,7 +42,7 @@ def translate_text(
         domain = Domain.COMMON
 
     result = v2transapi(content, from_, to, domain)
-    
+
     if 'error' in result:
         raise Exception(result['errmsg'])
 

@@ -11,7 +11,7 @@ class Domain(enum.Enum):
     MILITARY = 'military'  # 军事
 
 
-def check_domain(domain: Domain, fromLang: str, toLang: str):
+def check_domain(domain: Domain, fromLang: str, toLang: str) -> bool:
     chinese_english = ('zh', 'en')
 
     if domain == Domain.COMMON:

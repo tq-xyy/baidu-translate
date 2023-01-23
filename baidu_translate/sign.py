@@ -1,7 +1,7 @@
 import math
 
 
-def sign(string, gtk):
+def sign(string: str, gtk: str) -> str:
     if len(string) > 30:
         center = math.floor(len(string) / 2)
         string = string[:10] + string[center - 5:center + 5] + string[-10:]
