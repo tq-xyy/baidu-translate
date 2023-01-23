@@ -1,6 +1,7 @@
 import re
 
 from .domain import Domain
+from .languages import Lang
 from .sign import sign
 from .utils import environment, headers, session
 
@@ -34,16 +35,16 @@ def langdectet(content: str) -> str:
     res = session.post('https://fanyi.baidu.com/langdetect',
                        data={'query': content}, headers=headers, cookies=cookies).json()
 
-    if res['msg'] == 'success' and res['lan']:
+    if res.get('msg', None) == 'success' and res.get('lan', None):
         return res['lan']
 
 
-def v2transapi(content: str, fromLang: str, toLang: str, domain: Domain) -> dict:
+def v2transapi(content: str, fromLang: Lang, toLang: Lang, domain: Domain) -> dict:
     tokens = _fetch_gtk_and_token()
 
     data = {
-        'from': fromLang,
-        'to': toLang,
+        'from': fromLang.value,
+        'to': toLang.value,
         'query': content,
         'transtype': 'translang',
         'simple_means_flag': 3,

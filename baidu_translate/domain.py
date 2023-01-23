@@ -2,12 +2,12 @@ import enum
 
 
 class Domain(enum.Enum):
-    COMMON = 'common'     # 通用领域
-    BM = 'medicine'       # 生物医药
+    COMMON = 'common'      # 通用领域
+    BM = 'medicine'        # 生物医药
     ET = 'electronics'     # 电子科技
     WCM = 'mechanics'      # 水利机械
-    NOVEL = 'novel'       # 网络文学
-    FINANCE = 'finance'   # 金融
+    NOVEL = 'novel'        # 网络文学
+    FINANCE = 'finance'    # 金融
     MILITARY = 'military'  # 军事
 
 

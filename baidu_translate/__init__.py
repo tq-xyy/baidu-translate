@@ -1,15 +1,36 @@
-from .api import v2transapi, langdectet
-from .domain import Domain, check_domain
 import warnings
+from typing import Union
 
-__all__ = ['translate_text']
+from .api import langdectet, v2transapi
+from .domain import Domain, check_domain
+from .languages import Lang, lang_from_string
 
+__all__ = ['translate_text', 'detect_language', 'Domain', 'Lang']
 
-def translate_text(content: str, /, from_='auto', to='auto', domain: Domain = Domain.COMMON) -> str:
-    if from_ == 'auto':
-        from_ = langdectet(content)
-    if to == 'auto':
-        to = 'en' if from_ == 'zh' else 'zh'
+# We place the function here because it need call api to detect language.
+def normalize_language(content, fromLang, toLang):
+    if not isinstance(fromLang, Lang):
+        fromLang = lang_from_string(fromLang)
+    if not isinstance(toLang, Lang):
+        toLang = lang_from_string(toLang)
+
+    if fromLang == Lang.AUTO:
+        fromLang = lang_from_string(langdectet(content))
+    if toLang == Lang.AUTO:
+        toLang = Lang.EN if fromLang == Lang.ZH else Lang.ZH
+
+    return fromLang, toLang
+    
+
+def translate_text(
+    content: str, /,
+    from_: Union[str, Lang] =Lang.AUTO, to:Union[str, Lang]=Lang.AUTO,
+    domain: Domain = Domain.COMMON
+) -> str:
+    if not content:
+        return content
+
+    from_, to = normalize_language(content, from_, to)
     if from_ == to:
         return content
 
@@ -19,9 +40,27 @@ def translate_text(content: str, /, from_='auto', to='auto', domain: Domain = Do
         domain = Domain.COMMON
 
     result = v2transapi(content, from_, to, domain)
+    
+    if 'error' in result:
+        raise Exception(result['errmsg'])
 
     dst = []
     for row in result['trans_result']['data']:
         dst.append(row['dst'])
 
     return '\n'.join(dst)
+
+
+def dectet_language(content: str) -> Union[Lang, None]:
+    if not content:
+        return None
+    try:
+        lang = langdectet(content)
+        if not lang:
+            lang = None
+    except:
+        lang = None
+
+    if lang:
+        return lang_from_string(lang)
+    return None

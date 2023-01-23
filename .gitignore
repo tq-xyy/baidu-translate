@@ -1,4 +1,6 @@
-baidu_translate.egg-info 
-build 
-dist 
+baidu_translate.egg-info
+build
+dist
 __pycache__
+
+fanyi.test.py
