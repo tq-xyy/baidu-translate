@@ -7,7 +7,7 @@ setup(
     name='baidu_translate',
     version='1.0.0',
     packages=['baidu_translate'],
-    license='Public Domain',
+    license='Unlicense',
     author='tq_xyy',
     author_email='17097231932@163.com',
     url='https://github.com/17097231932/baidu-translate/',

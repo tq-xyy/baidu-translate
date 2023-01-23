@@ -5,6 +5,7 @@
 特点:
 
 -   采用百度翻译公共接口, 无鉴权, 完全免费。
+-   支持垂直翻译, 可提高翻译准确度。
 -   代码内部自动获取 Token 和 GTK, 无需使用者手动获取。
 -   接口简洁, 没有复杂的前置调用。
 -   相对于同类开源项目而言, sign 算法采用 Python 重新编写, 无需额外的依赖和调用开销。
@@ -13,28 +14,82 @@
 ## Demo
 
 ```python
-import baidu_translate
-result = baidu_translate.v2transapi('Hello, World!', 'en', 'zh')
+import baidu_translate as fanyi
+
+result = fanyi.translate_text('Hello, World!')
+result_ru = fanyi.translate_text('Hello, World!', to=fanyi.Lang.RU)
+print(result, result_ru)
+# 你好，世界！ Здравствуйте, Мир!
+
+lang = fanyi.detcet_language('Vue rapide')
+print(lang == fanyi.Lang.FRA)
+# True
+
+result = fanyi.translate_text('我们是中国人，我们爱自己的祖国！')
 print(result)
-# 你好，世界！
+# We are Chinese, we love our motherland!
+
+result_common = fanyi.translate_text('年化收益率')
+result_domain = fanyi.translate_text('年化收益率', domain=fanyi.Domain.FINANCE) # 金融
+print(result_common, result_domain)
+# Annualized rate of return & Annualized yield
 ```
 
 ## API
 
-翻译 API 接口请参见 [api.py](https://github.com/17097231932/baidu-translate/blob/main/baidu_translate/api.py), 源代码简洁易懂欢迎阅读。
-翻译语种请参见[百度官方文档](https://fanyi-api.baidu.com/doc/21), 请不要乱填。
+### baidu_translate.translate_text(content, /, from_=Lang.AUTO, to=Lang.AUTO, domain=Domain.COMMON)
+
+翻译 `content` 中的内容, 并返回一个字符串。
+
+`from_` 和 `to` 分别是翻译的源语言和目标语言。接受一个 `Lang` 对象, 也可传入一个字符串, 将自动转化为 `Lang` 对象。如果未指定或为 `Lang.AUTO`, 将自动检测源语言或目标语言。
+
+`domain` 是垂直翻译领域，请传入一个 `Domain` 对象。
+
+如果 `content` 为空或源语言与目标语言相同将不做更改。
+
+### baidu_translate.detcet_language(content)
+
+检测 `content` 的语种。返回一个 `Lang` 对象。如果检测不出来将返回 `None`。
+
+### baidu_translate.Lang
+
+枚举对象, 包含百度支持的所有语种的 ID, 请注意是全部大写。
+
+*建议结合 IDE 自动补全使用。*
 
 ```python
 
-def translate_text(content: str, /, from_: str ='auto', to: str ='auto') -> str:...
+class Lang(enum.Enum):
+    # will be replace with real language
+    AUTO = 'auto'  # 自动检测
 
-# --- 原始接口 ---
+    # Common Languages
+    ZH = 'zh'    # 中文(简体)
+    EN = 'en'    # 英语
+    SPA = 'spa'  # 西班牙语
+    ARA = 'ara'  # 阿拉伯语
+    FRA = 'fra'  # 法语
+    RU = 'ru'    # 俄语
 
-# 检测语种
-def langdectet(content: str) -> str:...
+    # More Languages
+    ...
+```
 
-# 翻译 (注意此处返回的是原始数据, 没有文档, 请自行解析)
-def v2transapi(content: str, fromLang: str, toLang: str) -> dict:...
+### baidu_translate.Domain
+
+枚举对象, 百度的垂直翻译领域, 请注意是全部大写。
+
+*建议结合 IDE 自动补全使用。*
+
+```python
+class Domain(enum.Enum):
+    COMMON = 'common'      # 通用领域
+    BM = 'medicine'        # 生物医药
+    ET = 'electronics'     # 电子科技
+    WCM = 'mechanics'      # 水利机械
+    NOVEL = 'novel'        # 网络文学
+    FINANCE = 'finance'    # 金融
+    MILITARY = 'military'  # 军事
 ```
 
 ## 参考

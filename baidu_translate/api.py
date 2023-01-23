@@ -29,7 +29,7 @@ def _fetch_gtk_and_token():
     return gtk, token
 
 
-def langdectet(content: str) -> str:
+def langdetect(content: str) -> str:
     result = session.post('https://fanyi.baidu.com/langdetect',
                           data={'query': content}, headers=headers, cookies=cookies).json()
 

@@ -1,7 +1,7 @@
 import warnings
 from typing import Union
 
-from .api import langdectet, v2transapi
+from .api import langdetect, v2transapi
 from .domain import Domain, check_domain
 from .languages import Lang, lang_from_string
 
@@ -17,7 +17,7 @@ def _normalize_language(content, fromLang, toLang):
         toLang = lang_from_string(toLang)
 
     if fromLang == Lang.AUTO:
-        fromLang = lang_from_string(langdectet(content))
+        fromLang = lang_from_string(langdetect(content))
     if toLang == Lang.AUTO:
         toLang = Lang.EN if fromLang == Lang.ZH else Lang.ZH
 
@@ -53,11 +53,11 @@ def translate_text(
     return '\n'.join(dst)
 
 
-def dectet_language(content: str) -> Union[Lang, None]:
+def detect_language(content: str) -> Union[Lang, None]:
     if not content:
         return None
     try:
-        lang = langdectet(content)
+        lang = langdetect(content)
         if not lang:
             lang = None
     except:
