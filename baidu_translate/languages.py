@@ -4,7 +4,7 @@ import enum
 class Lang(enum.Enum):
     # will be replace with real language
     AUTO = 'auto'  # 自动检测
-    
+
     # Common Languages
     ZH = 'zh'    # 中文(简体)
     EN = 'en'    # 英语

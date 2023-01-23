@@ -1,4 +1,5 @@
 import re
+import urllib.parse
 
 from .domain import Domain
 from .languages import Lang
@@ -29,11 +30,11 @@ def _fetch_gtk_and_token():
 
 
 def langdectet(content: str) -> str:
-    res = session.post('https://fanyi.baidu.com/langdetect',
-                       data={'query': content}, headers=headers, cookies=cookies).json()
+    result = session.post('https://fanyi.baidu.com/langdetect',
+                          data={'query': content}, headers=headers, cookies=cookies).json()
 
-    if res.get('msg', None) == 'success' and res.get('lan', None):
-        return res['lan']
+    if result.get('msg', None) == 'success' and result.get('lan', None):
+        return result['lan']
 
 
 def v2transapi(content: str, fromLang: Lang, toLang: Lang, domain: Domain) -> dict:
@@ -50,11 +51,11 @@ def v2transapi(content: str, fromLang: Lang, toLang: Lang, domain: Domain) -> di
         'domain': domain.value,
     }
 
-    res = session.post(
+    response = session.post(
         'https://fanyi.baidu.com/v2transapi',
         headers=headers,
         params={'from': fromLang, 'to': toLang},
         data=data,
         cookies=cookies
     )
-    return res.json()
+    return response.json()
