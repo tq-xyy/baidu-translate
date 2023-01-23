@@ -1,4 +1,5 @@
 import enum
+from .languages import Lang
 
 
 class Domain(enum.Enum):
@@ -12,16 +13,19 @@ class Domain(enum.Enum):
 
 
 def check_domain(domain: Domain, fromLang: str, toLang: str) -> bool:
-    chinese_english = ('zh', 'en')
-
     if domain == Domain.COMMON:
         return True
+
     if domain in (Domain.FINANCE, Domain.BM):
+        chinese_english = (Lang.ZH, Lang.EN)
         return (fromLang in chinese_english) and (toLang in chinese_english)
+
     if domain in (Domain.NOVEL, Domain.ET, Domain.WCM):
-        return fromLang == 'zh' and toLang == 'en'
+        return fromLang == Lang.ZH and toLang == Lang.EN
+
     if domain == Domain.MILITARY:
-        shouldFromLang = ['en', 'ru', 'jp', 'kor',
-                          'hi', 'fra', 'de', 'spa', 'vie']
-        return fromLang in shouldFromLang and toLang == 'en'
+        shouldFromLang = [Lang.EN, Lang.RU, Lang.JP, Lang.KOR,
+                          Lang.HI, Lang.FRA, Lang.DE, Lang.SPA, Lang.VIE]
+        return fromLang in shouldFromLang and toLang == Lang.EN
+
     return False
