@@ -4,6 +4,7 @@ from functools import lru_cache
 
 import requests
 
+from .domain import Domain
 from .sign import sign
 
 headers = {
@@ -31,7 +32,7 @@ def _fetch_gtk_and_token(retries=5):
 
         # Step 2: Use the cookie to request to get token
         response2 = session.get('https://fanyi.baidu.com/',
-                                 headers=headers, cookies=cookies)
+                                headers=headers, cookies=cookies)
 
         token = re.search(r"token: '(.+?)',", response2.text)[1]
 
@@ -49,6 +50,8 @@ def _fetch_gtk_and_token(retries=5):
 token_cache = None
 
 # refresh time: one minute
+
+
 def get_token():
     global token_cache
     if not token_cache or (time.time() - token_cache[0] >= 60):
@@ -62,13 +65,14 @@ def get_token():
 @lru_cache(maxsize=256)
 def langdectet(content: str) -> str:
     res = session.post('https://fanyi.baidu.com/langdetect',
-                        data={'query': content}, headers=headers, cookies=cookies).json()
-    
+                       data={'query': content}, headers=headers, cookies=cookies).json()
+
     if res['msg'] == 'success' and res['lan']:
         return res['lan']
 
+
 @lru_cache(maxsize=256)
-def v2transapi(content: str, fromLang: str, toLang: str) -> dict:
+def v2transapi(content: str, fromLang: str, toLang: str, domain: Domain) -> dict:
     tokens = get_token()
 
     data = {
@@ -79,7 +83,7 @@ def v2transapi(content: str, fromLang: str, toLang: str) -> dict:
         'simple_means_flag': 3,
         'sign': sign(content, tokens['gtk']),
         'token': tokens['token'],
-        'domain': 'common'
+        'domain': domain.value,
     }
 
     res = session.post(

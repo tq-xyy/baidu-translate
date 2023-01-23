@@ -1,5 +1,6 @@
 import math
 
+
 def sign(string, gtk):
     if len(string) > 30:
         center = math.floor(len(string) / 2)
