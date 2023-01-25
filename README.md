@@ -21,7 +21,7 @@ result_ru = fanyi.translate_text('Hello, World!', to=fanyi.Lang.RU)
 print(result, result_ru)
 # 你好，世界！ Здравствуйте, Мир!
 
-lang = fanyi.detcet_language('Vue rapide')
+lang = fanyi.detect_language('Vue rapide')
 print(lang == fanyi.Lang.FRA)
 # True
 
@@ -31,8 +31,43 @@ print(result)
 
 result_common = fanyi.translate_text('年化收益率')
 result_domain = fanyi.translate_text('年化收益率', domain=fanyi.Domain.FINANCE) # 金融
-print(result_common, result_domain)
+print(result_common, '&', result_domain)
 # Annualized rate of return & Annualized yield
+```
+
+你也可以使用异步模式:
+
+```python
+import baidu_translate as fanyi
+import asyncio, time
+
+# Make cache
+fanyi.translate_text('Hi!')
+
+def test_sync(text):
+    texts = []
+    for lang in ['zh', 'en', 'fra', 'ru', 'ara', 'spa']:
+        texts.append(fanyi.translate_text(text, to=lang))
+
+    return ' '.join(texts)
+
+async def test_async(text):
+    tasks = []
+    for lang in ['zh', 'en', 'fra', 'ru', 'ara', 'spa']:
+        tasks.append(fanyi.translate_text_async(text, to=lang))
+    texts = await asyncio.gather(*tasks)
+
+    return ' '.join(texts)
+
+start = time.time()
+result_sync = test_sync('Good morning!')
+print('Sync Time:', time.time() - start)
+
+start = time.time()
+result_async = asyncio.run(test_async('Good morning!'))
+print('Async Time:', time.time() - start)
+
+print(result_sync == result_async)
 ```
 
 ## API
@@ -47,7 +82,7 @@ print(result_common, result_domain)
 
 如果 `content` 为空或源语言与目标语言相同将不做更改。
 
-### baidu_translate.detcet_language(content)
+### baidu_translate.detect_language(content)
 
 检测 `content` 的语种。返回一个 `Lang` 对象。如果检测不出来将返回 `None`。
 
