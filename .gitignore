@@ -1,6 +1,6 @@
-baidu_translate.egg-info
+*.egg-info
 build
 dist
 __pycache__
 
-fanyi.test.py
+*ignored*

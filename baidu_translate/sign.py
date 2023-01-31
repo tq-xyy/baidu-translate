@@ -6,11 +6,13 @@ from ast import PyCF_ONLY_AST
 
 from Crypto.Cipher import AES
 
+from .errors import NeedUpdate
+
 
 def sign(string: str, gtk: str) -> str:
     if len(string) > 30:
         center = math.floor(len(string) / 2)
-        string = string[:10] + string[center - 5:center + 5] + string[-10:]
+        string = string[:10] + string[center - 5 : center + 5] + string[-10:]
 
     [p, q] = map(int, gtk.split('.'))
 
@@ -18,15 +20,15 @@ def sign(string: str, gtk: str) -> str:
 
     for b in bytes(string, 'utf-8'):
         g += b
-        g = (g + (g << 10)) & 0xffffffff
+        g = (g + (g << 10)) & 0xFFFFFFFF
         g = g ^ (g >> 6)  # TODO: g = g ^ (g >>> 6)
 
-    g = (g + (g << 3)) & 0xffffffff
+    g = (g + (g << 3)) & 0xFFFFFFFF
     g = g ^ (g >> 11)  # TODO: g = g ^ (g >>> 6)
-    g = ((g + (g << 15)) & 0xffffffff) ^ q
+    g = ((g + (g << 15)) & 0xFFFFFFFF) ^ q
 
     if g <= 0:
-        g = (0x7fffffff & g) + 0x80000000
+        g = (0x7FFFFFFF & g) + 0x80000000
 
     g = g % 1000000
 
@@ -56,22 +58,29 @@ def acs_token(acs_sign_js: str, url: str, ua: str) -> str:
         assert len(arg0) == 13
         assert len(arg1) == 16
         assert len(arg2) == 16
-    except (AssertionError, NameError, AttributeError, SyntaxError) as err:
-        bug_report = 'https://github.com/17097231932/baidu-translate/issues/new/choose'
-        raise Exception(
-            'Cannot get the secret key. '
+    except (
+        AssertionError,
+        NameError,
+        AttributeError,
+        SyntaxError,
+        IndexError,
+    ) as err:
+        bug_report = (
+            'https://github.com/17097231932/baidu-translate/issues/new/choose'
+        )
+        raise NeedUpdate(
+            'Can\'t get the secret key. '
             f'It is possible that Baidu has updated. To report bugs, please visit {bug_report}.'
         ) from err
     ts = math.floor(time.time() * 1000)
 
-    data = json.dumps({
-        'ua': ua,
-        'url': url,
-        'clientTs': ts,
-        'version': '1.0.0.6'
-    }, separators=(',', ':'))
+    data = json.dumps(
+        {'ua': ua, 'url': url, 'clientTs': ts, 'version': '1.0.0.6'},
+        separators=(',', ':'),
+    )
 
-    cipher = AES.new(arg1.encode('latin-1'),
-                     AES.MODE_CBC, arg2.encode('latin-1'))
+    cipher = AES.new(
+        arg1.encode('latin-1'), AES.MODE_CBC, arg2.encode('latin-1')
+    )
     data = cipher.encrypt(pkcs7padding(data.encode('utf-8')))
     return arg0 + '_' + str(ts) + '_' + base64.b64encode(data).decode('utf-8')

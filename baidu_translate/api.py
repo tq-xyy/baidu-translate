@@ -1,14 +1,14 @@
 import re
 from urllib.parse import quote_plus
 
-import aiohttp
+from aiohttp import ClientSession
 
 from .sign import acs_token, sign
 from .utils import environment, max_request_lock
 
 
 @environment
-async def _fetch_gtk_and_token(session: aiohttp.ClientSession):
+async def _fetch_gtk_and_token(session: ClientSession):
     # Step 1: Get gtk and cookie
     response1 = await session.get('https://fanyi.baidu.com/')
     gtk = re.search(r'window.gtk *= *"(.+?)";?', await response1.text())[1]
@@ -21,22 +21,31 @@ async def _fetch_gtk_and_token(session: aiohttp.ClientSession):
 
 
 @environment
-async def _fetch_acs_sign_js(session: aiohttp.ClientSession):
-    resp = await session.get('https://dlswbr.baidu.com/heicha/mm/2060/acs-2060.js')
+async def _fetch_acs_sign_js(session: ClientSession):
+    resp = await session.get(
+        'https://dlswbr.baidu.com/heicha/mm/2060/acs-2060.js'
+    )
     return await resp.text(), resp.request_info.headers['User-Agent']
 
 
-async def langdetect(content: str, session: aiohttp.ClientSession) -> str:
+async def langdetect(content: str, session: ClientSession) -> str:
     async with max_request_lock():
-        resp = await session.post('https://fanyi.baidu.com/langdetect',
-                                  data={'query': content})
+        resp = await session.post(
+            'https://fanyi.baidu.com/langdetect', data={'query': content}
+        )
         result = await resp.json()
 
         if result.get('msg', None) == 'success' and result.get('lan', None):
             return result['lan']
 
 
-async def v2transapi(content: str, fromLang: str, toLang: str, domain: str, session: aiohttp.ClientSession) -> dict:
+async def v2transapi(
+    content: str,
+    fromLang: str,
+    toLang: str,
+    domain: str,
+    session: ClientSession,
+) -> dict:
     async with max_request_lock():
         gtk, token = await _fetch_gtk_and_token(session)
 
@@ -61,14 +70,14 @@ async def v2transapi(content: str, fromLang: str, toLang: str, domain: str, sess
         page = f'https://fanyi.baidu.com/#{fromLang}/{toLang}/{quote_plus(content)}'
         headers = {
             'Acs-Token': acs_token(acs_sign_js, page, user_agent),
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         }
 
         response = await session.post(
             'https://fanyi.baidu.com/v2transapi',
             params=params,
             data=data,
-            headers=headers
+            headers=headers,
         )
 
         return await response.json()

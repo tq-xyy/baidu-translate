@@ -1,4 +1,7 @@
 import enum
+from typing import Tuple, Union
+
+from .errors import UnknownLanguage
 
 
 class Lang(enum.Enum):
@@ -6,28 +9,28 @@ class Lang(enum.Enum):
     AUTO = 'auto'  # 自动检测
 
     # Common Languages
-    ZH = 'zh'    # 中文(简体)
-    EN = 'en'    # 英语
+    ZH = 'zh'  # 中文(简体)
+    EN = 'en'  # 英语
     SPA = 'spa'  # 西班牙语
     ARA = 'ara'  # 阿拉伯语
     FRA = 'fra'  # 法语
-    RU = 'ru'    # 俄语
+    RU = 'ru'  # 俄语
 
-    JP = 'jp'    # 日语
-    TH = 'th'    # 泰语
+    JP = 'jp'  # 日语
+    TH = 'th'  # 泰语
     KOR = 'kor'  # 韩语
-    DE = 'de'    # 德语
-    PT = 'pt'    # 葡萄牙语
-    IT = 'it'    # 意大利语
-    EL = 'el'    # 希腊语
-    NL = 'nl'    # 荷兰语
-    PL = 'pl'    # 波兰语
+    DE = 'de'  # 德语
+    PT = 'pt'  # 葡萄牙语
+    IT = 'it'  # 意大利语
+    EL = 'el'  # 希腊语
+    NL = 'nl'  # 荷兰语
+    PL = 'pl'  # 波兰语
     FIN = 'fin'  # 芬兰语
-    CS = 'cs'    # 捷克语
+    CS = 'cs'  # 捷克语
     BUL = 'bul'  # 保加利亚语
     DAN = 'dan'  # 丹麦语
     EST = 'est'  # 爱沙尼亚语
-    HU = 'hu'    # 匈牙利语
+    HU = 'hu'  # 匈牙利语
     ROM = 'rom'  # 罗马尼亚语
     SLO = 'slo'  # 斯洛文尼亚语
     SWE = 'swe'  # 瑞典语
@@ -58,10 +61,10 @@ class Lang(enum.Enum):
     GUJ = 'guj'  # 古吉拉特语
     HAU = 'hau'  # 豪萨语
     HEB = 'heb'  # 希伯来语
-    HI = 'hi'    # 印地语
+    HI = 'hi'  # 印地语
     ICE = 'ice'  # 冰岛语
     IBO = 'ibo'  # 伊博语
-    ID = 'id'    # 印尼语
+    ID = 'id'  # 印尼语
     GLE = 'gle'  # 爱尔兰语
     KAN = 'kan'  # 卡纳达语
     KLI = 'kli'  # 克林贡语
@@ -72,7 +75,7 @@ class Lang(enum.Enum):
     LIT = 'lit'  # 立陶宛语
     LTZ = 'ltz'  # 卢森堡语
     MAC = 'mac'  # 马其顿语
-    MG = 'mg'    # 马拉加斯语
+    MG = 'mg'  # 马拉加斯语
     MAY = 'may'  # 马来语
     MAL = 'mal'  # 马拉雅拉姆语
     MLT = 'mlt'  # 马耳他语
@@ -83,7 +86,7 @@ class Lang(enum.Enum):
     SRD = 'srd'  # 萨丁尼亚语
     SRP = 'srp'  # 塞尔维亚语(拉丁文)
     SIN = 'sin'  # 僧伽罗语
-    SK = 'sk'    # 斯洛伐克语
+    SK = 'sk'  # 斯洛伐克语
     SOM = 'som'  # 索马里语
     SWA = 'swa'  # 斯瓦希里语
     TGL = 'tgl'  # 他加禄语
@@ -91,7 +94,7 @@ class Lang(enum.Enum):
     TAM = 'tam'  # 泰米尔语
     TAT = 'tat'  # 鞑靼语
     TEL = 'tel'  # 泰卢固语
-    TR = 'tr'    # 土耳其语
+    TR = 'tr'  # 土耳其语
     TUK = 'tuk'  # 土库曼语
     UKR = 'ukr'  # 乌克兰语
     URD = 'urd'  # 乌尔都语
@@ -99,7 +102,7 @@ class Lang(enum.Enum):
     KIR = 'kir'  # 吉尔吉斯语
     PUS = 'pus'  # 普什图语
     HKM = 'hkm'  # 高棉语
-    HT = 'ht'    # 海地语
+    HT = 'ht'  # 海地语
     NOB = 'nob'  # 书面挪威语
     PAN = 'pan'  # 旁遮普语
     ARQ = 'arq'  # 阿尔及利亚阿拉伯语
@@ -180,8 +183,8 @@ class Lang(enum.Enum):
     PED = 'ped'  # 北索托语
     QUE = 'que'  # 克丘亚语
     ROH = 'roh'  # 罗曼什语
-    RO = 'ro'    # 罗姆语
-    SM = 'sm'    # 萨摩亚语
+    RO = 'ro'  # 罗姆语
+    SM = 'sm'  # 萨摩亚语
     SAN = 'san'  # 梵语
     SCO = 'sco'  # 苏格兰语
     SHA = 'sha'  # 掸语
@@ -210,7 +213,28 @@ class Lang(enum.Enum):
     SRC = 'src'  # 塞尔维亚语(西里尔文)
 
 
-def lang_from_string(string: str) -> Lang:
+def lang_from_string(string: Union[str, Lang]) -> Lang:
+    if isinstance(string, Lang):
+        return string
+
     if string not in Lang._value2member_map_:
-        raise ValueError('Unsupported language ' + string)
+        raise UnknownLanguage('Unsupported language ' + string)
     return Lang._value2member_map_[string]
+
+
+def normalize_language(
+    detected: str, fromLang: Union[Lang, str], toLang: Union[Lang, str]
+) -> Tuple[Lang, Lang]:
+    fromLang = lang_from_string(fromLang)
+    toLang = lang_from_string(toLang)
+
+    if fromLang == Lang.AUTO:
+        if not detected:
+            raise UnknownLanguage(
+                'Can\'t detect language, please set `from_` argument.'
+            )
+        fromLang = lang_from_string(detected)
+    if toLang == Lang.AUTO:
+        toLang = Lang.EN if fromLang == Lang.ZH else Lang.ZH
+
+    return fromLang, toLang
