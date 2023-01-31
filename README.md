@@ -11,7 +11,15 @@
 -   相对于同类开源项目而言, sign 算法采用 Python 重新编写, 无需额外的依赖和调用开销。
 -   得益于缓存机制，首次调用可能稍慢，但后续调用相当之快。
 
-## Demo
+## 安装
+
+本项目仍处于快速开发状态，未发布到 PYPI，你可以通过以下方法来安装。
+
+```sh
+$ pip install git+https://github.com/17097239132/baidu-translate.git
+```
+
+## 例子
 
 ```python
 import baidu_translate as fanyi
@@ -35,40 +43,62 @@ print(result_common, '&', result_domain)
 # Annualized rate of return & Annualized yield
 ```
 
-你也可以使用异步模式:
+你也可以使用异步和多线程:
 
 ```python
 import baidu_translate as fanyi
 import asyncio, time
+from concurrent.futures import ThreadPoolExecutor
 
 # Make cache
 fanyi.translate_text('Hi!')
 
+langs = ['zh', 'en', 'fra', 'ru', 'ara', 'spa']
+
+
 def test_sync(text):
     texts = []
-    for lang in ['zh', 'en', 'fra', 'ru', 'ara', 'spa']:
+    for lang in langs:
         texts.append(fanyi.translate_text(text, to=lang))
 
     return ' '.join(texts)
 
+
 async def test_async(text):
     tasks = []
-    for lang in ['zh', 'en', 'fra', 'ru', 'ara', 'spa']:
+    for lang in langs:
         tasks.append(fanyi.translate_text_async(text, to=lang))
     texts = await asyncio.gather(*tasks)
 
     return ' '.join(texts)
 
+
+def test_thread(text):
+    with ThreadPoolExecutor() as pool:
+        texts = pool.map(
+            lambda lang: fanyi.translate_text(text, to=lang), langs
+        )
+
+    return ' '.join(texts)
+
+
 start = time.time()
 result_sync = test_sync('Good morning!')
-print('Sync Time:', time.time() - start)
+print('Sync Time:', time.time() - start) # 1s~
 
 start = time.time()
 result_async = asyncio.run(test_async('Good morning!'))
-print('Async Time:', time.time() - start)
+print('Async Time:', time.time() - start) # 2s~
 
-print(result_sync == result_async)
+start = time.time()
+result_thread = test_thread('Good morning!')
+print('Thread Time:', time.time() - start) # 1s~
+
+print(result_sync == result_async == result_thread)
+# True
 ```
+
+上述中代码中同步调用因缓存原因与多线程模式不相上下。为了规避百度对并发的限制，异步模式将会加锁，所以通常情况下，多线程>同步>异步，但是在服务器环境下，异步模式可以有效地提高吞吐量，而多线程适合大规模翻译，同步则用于工具类项目。请根据使用场景自行抉择。
 
 ## API
 
@@ -127,14 +157,19 @@ class Domain(enum.Enum):
     MILITARY = 'military'  # 军事
 ```
 
-## 参考
+## 参考文献
 
 1. [hujingshuang 的百度翻译 API](https://github.com/ZCY01/BaiduTranslate) ([百度翻译接口 破解](https://blog.csdn.net/hujingshuang/article/details/80180294))
+2. [百度指数 Cipher-Text、百度翻译 Acs-Token 逆向分析](https://juejin.cn/post/7133151365806686245)
+3. [js逆向-最新版百度翻译参数解密](https://blog.csdn.net/weixin_46672080/article/details/126533612)
+4. [python的AES-CBC加密](https://zhuanlan.zhihu.com/p/184968023)
 
 ## 版权 & 免责声明
 
-本项目已被放入公有领域，作者放弃所有权利。任何人都可以自由地使用本项目，而无需注明作者。
+本项目已被放入*公有领域*，作者**放弃**所有权利。任何人都可以自由地使用本项目，而无需注明作者。
 
 但值得注意的是，本项目违反了[百度翻译（PC 版）用户使用协议](https://fanyi.baidu.com/static/webpage/agreement.html)的第三十一条第一款。百度公司随时可以联系本人删除项目，但由此衍生出的任何法律问题本人概不负责（包括但不限于用户使用不当而对百度公司服务器造成的损失）。
+
+特别提醒：本项目仅供**学习讨论**。建议不要在商业项目中使用，以规避法律风险。
 
 且用且珍惜！
