@@ -13,5 +13,5 @@ setup(
     url='https://github.com/17097231932/baidu-translate/',
     description='一个免费, 高效, 简洁百度翻译接口',
     long_description=description,
-    requires=['aiohttp'],
+    requires=['aiohttp', 'pycryptodome'],
 )

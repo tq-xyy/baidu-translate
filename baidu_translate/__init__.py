@@ -32,9 +32,9 @@ async def translate_text_async(
 ) -> str:
     if not content:
         return content
-    
+
     session = await get_session()
-    
+
     detected = await langdetect(content, session=session)
     from_, to = _normalize_language(detected, from_, to)
     if from_ == to:

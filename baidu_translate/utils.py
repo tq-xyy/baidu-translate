@@ -3,20 +3,38 @@ import atexit
 import functools
 import time
 import weakref
+import threading
 
 import aiohttp
 
+# For threading safe
+_lock_local = threading.local()
+
 # Due to Baidu's limitations, we cannot submit many requests at once.
-max_request_lock = asyncio.Semaphore(1)
+def max_request_lock() -> asyncio.Semaphore:
+    if not hasattr(_lock_local, 'max_request_lock'):
+        _lock_local.max_request_lock = asyncio.Semaphore(1)
+    return _lock_local.max_request_lock
+
 
 headers = {
-    'Accept': 'application/json, text/plain, */*',
+    'Accept': '*/*',
+    'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
     'Pragma': 'no-cache',
+    'sec-ch-ua': '"Not_A Brand";v="99", "Microsoft Edge";v="109", "Chromium";v="109"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
     'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+    'X-Requested-With': 'XMLHttpRequest',
     # For baidu
+    'Host': 'fanyi.baidu.com',
+    'Origin': 'https://fanyi.baidu.com',
     'Referer': 'https://fanyi.baidu.com/',
 }
 
@@ -73,5 +91,9 @@ def environment(fn):
 
 
 def run_sync(async_fn):
-    loop = asyncio.get_event_loop()
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
     return loop.run_until_complete(async_fn)
