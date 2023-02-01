@@ -1,6 +1,6 @@
 ---
-name: Report Problems
-about: Use this template for reporting bugs.
+name: 报告 BUG
+about: 向我们说明你遇到的 BUG
 labels: bug
 ---
 
