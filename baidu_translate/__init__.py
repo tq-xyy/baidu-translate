@@ -7,7 +7,7 @@ from .api import langdetect, transapi, v2transapi
 from .domain import Domain, check_domain
 from .errors import TranslateError, select_error
 from .languages import Lang, lang_from_string, normalize_language
-from .utils import get_session, run_sync
+from .utils import get_session, run_sync, set_config
 
 __all__ = [
     'translate_text',
@@ -15,6 +15,7 @@ __all__ = [
     'Domain',
     'Lang',
     'TranslateError',
+    'set_config',
 ]
 
 

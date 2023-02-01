@@ -16,6 +16,7 @@ class Lang(enum.Enum):
     FRA = 'fra'  # 法语
     RU = 'ru'  # 俄语
 
+    # More Languages
     JP = 'jp'  # 日语
     TH = 'th'  # 泰语
     KOR = 'kor'  # 韩语

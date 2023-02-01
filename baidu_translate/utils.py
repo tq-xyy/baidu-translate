@@ -8,15 +8,33 @@ import threading
 import aiohttp
 
 DEFAULT_CONCURRENT = 1
+LOSSE_COOKIES = True
+
+
+def set_config(*, concurrent=None, losse_cookies=None):
+    global DEFAULT_CONCURRENT, LOSSE_COOKIES
+
+    if concurrent is not None:
+        DEFAULT_CONCURRENT = bool(concurrent)
+
+    if losse_cookies is not None:
+        LOSSE_COOKIES = bool(losse_cookies)
+
 
 # For threading safe
 _lock_local = threading.local()
 
 # Due to Baidu's limitations, we cannot submit many requests at once.
+
+
 def max_request_lock() -> asyncio.Semaphore:
     if not hasattr(_lock_local, 'max_request_lock'):
         _lock_local.max_request_lock = asyncio.Semaphore(DEFAULT_CONCURRENT)
     return _lock_local.max_request_lock
+
+
+def be_losse_cookies() -> bool:
+    return LOSSE_COOKIES
 
 
 headers = {
