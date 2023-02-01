@@ -3,6 +3,11 @@ from urllib.parse import quote_plus
 
 from aiohttp import ClientSession
 
+from .models import (
+    TransapiSentenceResult,
+    TransapiWordResult,
+    V2TransapiResult,
+)
 from .sign import acs_token, sign
 from .utils import environment, max_request_lock
 
@@ -45,7 +50,7 @@ async def v2transapi(
     toLang: str,
     domain: str,
     session: ClientSession,
-) -> dict:
+):
     async with max_request_lock():
         gtk, token = await _fetch_gtk_and_token(session)
 
@@ -80,4 +85,26 @@ async def v2transapi(
             headers=headers,
         )
 
-        return await response.json()
+        data = await response.json()
+        return V2TransapiResult(data)
+
+
+async def transapi(
+    content: str, fromLang: str, toLang: str, session: ClientSession
+):
+    data = {
+        'from': fromLang,
+        'to': toLang,
+        'query': content,
+        'source': 'txt',
+    }
+    async with max_request_lock():
+        resp = await session.post(
+            'https://fanyi.baidu.com/transapi', data=data
+        )
+        result = await resp.json()
+
+        if result.get('type', None) == 1:
+            return TransapiWordResult(result)
+        else:
+            return TransapiSentenceResult(result)

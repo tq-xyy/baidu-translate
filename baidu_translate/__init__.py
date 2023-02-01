@@ -3,7 +3,7 @@ from typing import Union
 
 from aiohttp import ClientSession
 
-from .api import langdetect, v2transapi
+from .api import langdetect, transapi, v2transapi
 from .domain import Domain, check_domain
 from .errors import TranslateError, select_error
 from .languages import Lang, lang_from_string, normalize_language
@@ -46,19 +46,25 @@ async def translate_text_async(
         )
         domain = Domain.COMMON
 
-    result = await v2transapi(
-        content, fromLang.value, toLang.value, domain.value, session=session
-    )
+    if domain == Domain.COMMON:
+        result = await transapi(
+            content, fromLang.value, toLang.value, session=session
+        )
+    else:
+        result = await v2transapi(
+            content,
+            fromLang.value,
+            toLang.value,
+            domain.value,
+            session=session,
+        )
 
-    if 'error' in result:
-        msg = f"{result['errmsg']} (code {result['error']})"
-        raise select_error(result['error'])(msg)
+    errors = result.get_errors()
+    if errors:
+        code, msg = errors
+        raise select_error(code)(f'{msg} (code {code})')
 
-    dst = []
-    for row in result['trans_result']['data']:
-        dst.append(row['dst'])
-
-    return '\n'.join(dst)
+    return str(result)
 
 
 async def detect_language_async(
@@ -70,12 +76,11 @@ async def detect_language_async(
     if not session:
         session = await get_session()
 
+    lang = None
     try:
         lang = await langdetect(content, session=session)
-        if not lang:
-            lang = None
     except:
-        lang = None
+        pass
 
     if lang:
         return lang_from_string(lang)

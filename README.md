@@ -92,13 +92,13 @@ print('Async Time:', time.time() - start) # 2s~
 
 start = time.time()
 result_thread = test_thread('Good morning!')
-print('Thread Time:', time.time() - start) # 1s~
+print('Thread Time:', time.time() - start) # 0.5s~
 
 print(result_sync == result_async == result_thread)
 # True
 ```
 
-上述中代码中同步调用因缓存原因与多线程模式不相上下。为了规避百度对并发的限制，异步模式将会加锁，所以通常情况下，多线程>同步>异步，但是在服务器环境下，异步模式可以有效地提高吞吐量，而多线程适合大规模翻译，同步则用于工具类项目。请根据使用场景自行抉择。
+为了规避百度对并发的限制，异步模式将会加锁，所以通常情况下，多线程>同步>异步，但是在服务器环境下，异步模式可以有效地提高吞吐量，而多线程适合大规模翻译，同步则用于工具类项目。请根据使用场景自行抉择。
 
 ## API
 
