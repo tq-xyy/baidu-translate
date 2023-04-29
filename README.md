@@ -84,21 +84,21 @@ def test_thread(text):
 
 start = time.time()
 result_sync = test_sync('Good morning!')
-print('Sync Time:', time.time() - start) # 1s~
+print('Sync Time:', time.time() - start) # 4.8s~
 
 start = time.time()
 result_async = asyncio.run(test_async('Good morning!'))
-print('Async Time:', time.time() - start) # 2s~
+print('Async Time:', time.time() - start) # 2.3s~
 
 start = time.time()
 result_thread = test_thread('Good morning!')
-print('Thread Time:', time.time() - start) # 0.5s~
+print('Thread Time:', time.time() - start) # 0.8s~
 
 print(result_sync == result_async == result_thread)
 # True
 ```
 
-为了规避百度对并发的限制，异步模式将会加锁，所以通常情况下，多线程>同步>异步，但是在服务器环境下，异步模式可以有效地提高吞吐量，而多线程适合大规模翻译，同步则用于工具类项目。请根据使用场景自行抉择。
+由于 httpx 请求库的缘故, 多线程模式的速度被显著提升, 而异步模式的效率并不突出。
 
 ## API
 

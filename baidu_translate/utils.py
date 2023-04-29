@@ -1,11 +1,9 @@
 import asyncio
-import atexit
 import functools
 import time
-import weakref
 import threading
 
-import aiohttp
+import httpx
 
 DEFAULT_CONCURRENT = 1
 LOSSE_COOKIES = True
@@ -57,20 +55,9 @@ headers = {
     'Referer': 'https://fanyi.baidu.com/',
 }
 
-_sessions = weakref.WeakKeyDictionary()
-atexit.register(lambda: [asyncio.run(s.close()) for s in _sessions.values()])
-
 
 async def get_session():
-    global _sessions
-
-    loop = asyncio.get_running_loop()
-
-    if loop in _sessions:
-        return _sessions[loop]
-
-    session = aiohttp.ClientSession(headers=headers)
-    _sessions[loop] = session
+    session = httpx.AsyncClient(headers=headers)
     return session
 
 

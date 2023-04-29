@@ -2,7 +2,7 @@ import re
 
 # from urllib.parse import quote_plus
 
-from aiohttp import ClientSession
+from httpx import AsyncClient
 
 from .models import (
     TransapiSentenceResult,
@@ -14,22 +14,17 @@ from .utils import be_losse_cookies, environment, max_request_lock
 
 
 @environment
-async def _fetch_cookie(session: ClientSession):
-    if len(session.cookie_jar.filter_cookies('https://fanyi.baidu.com/')) > 0:
+async def _fetch_cookie(session: AsyncClient):
+    if len(session.cookies.values()) > 0:
         return
 
-    cookie_jar = session.cookie_jar  # aiohttp.CookieJar(unsafe=True)
-
     if not be_losse_cookies():
-        resp = await session.get('https://www.baidu.com/')
-        cookie_jar.update_cookies(resp.cookies)
-        resp = await session.get('https://hector.baidu.com/a.js')
-        cookie_jar.update_cookies(resp.cookies)
+        await session.get('https://www.baidu.com/')
+        await session.get('https://hector.baidu.com/a.js')
 
-    resp = await session.get('https://fanyi.baidu.com/')
-    cookie_jar.update_cookies(resp.cookies)
+    await session.get('https://fanyi.baidu.com/')
 
-    cookie_jar.update_cookies(
+    session.cookies.update(
         {
             'APPGUIDE_10_0_2': '1',
             'REALTIME_TRANS_SWITCH': '1',
@@ -42,28 +37,28 @@ async def _fetch_cookie(session: ClientSession):
 
 
 @environment
-async def _fetch_gtk_and_token(session: ClientSession):
+async def _fetch_gtk_and_token(session: AsyncClient):
     response = await session.get('https://fanyi.baidu.com/')
-    gtk = re.search(r'window.gtk *= *"(.+?)";?', await response.text())[1]
-    token = re.search(r"token: *'(.+?)',?", await response.text())[1]
+    gtk = re.search(r'window.gtk *= *"(.+?)";?', response.text)[1]
+    token = re.search(r"token: *'(.+?)',?", response.text)[1]
 
     return gtk, token
 
 
 @environment
-async def _fetch_acs_sign_js(session: ClientSession):
+async def _fetch_acs_sign_js(session: AsyncClient):
     resp = await session.get('https://dlswbr.baidu.com/heicha/mm/2060/acs-2060.js')
-    return await resp.text(), resp.request_info.headers['User-Agent']
+    return resp.text, resp.request.headers['User-Agent']
 
 
-async def langdetect(content: str, session: ClientSession) -> str:
+async def langdetect(content: str, session: AsyncClient) -> str:
     await _fetch_cookie(session)
 
     async with max_request_lock():
         resp = await session.post(
             'https://fanyi.baidu.com/langdetect', data={'query': content}
         )
-        result = await resp.json()
+        result = resp.json()
 
         if result.get('msg', None) == 'success' and result.get('lan', None):
             return result['lan']
@@ -74,7 +69,7 @@ async def v2transapi(
     fromLang: str,
     toLang: str,
     domain: str,
-    session: ClientSession,
+    session: AsyncClient,
 ):
     await _fetch_cookie(session)
 
@@ -112,11 +107,10 @@ async def v2transapi(
             headers=headers,
         )
 
-        data = await response.json()
-        return V2TransapiResult(data)
+        return V2TransapiResult(response.json())
 
 
-async def transapi(content: str, fromLang: str, toLang: str, session: ClientSession):
+async def transapi(content: str, fromLang: str, toLang: str, session: AsyncClient):
     await _fetch_cookie(session)
 
     data = {
@@ -128,7 +122,7 @@ async def transapi(content: str, fromLang: str, toLang: str, session: ClientSess
 
     async with max_request_lock():
         resp = await session.post('https://fanyi.baidu.com/transapi', data=data)
-        result = await resp.json()
+        result = resp.json()
 
         if result.get('type', None) == 1:
             return TransapiWordResult(result)

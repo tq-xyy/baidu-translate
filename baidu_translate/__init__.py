@@ -1,7 +1,7 @@
 import warnings
 from typing import Union
 
-from aiohttp import ClientSession
+from httpx import AsyncClient
 
 from .api import langdetect, transapi, v2transapi
 from .domain import Domain, check_domain
@@ -26,7 +26,7 @@ async def translate_text_async(
     to: Union[str, Lang] = Lang.AUTO,
     domain: Domain = Domain.COMMON,
     *,
-    session: ClientSession = None,
+    session: AsyncClient = None,
 ) -> str:
     if not content:
         return content
@@ -67,7 +67,7 @@ async def translate_text_async(
 
 
 async def detect_language_async(
-    content: str, /, *, session: ClientSession = None
+    content: str, /, *, session: AsyncClient = None
 ) -> Union[Lang, None]:
     if not content:
         return None
@@ -78,7 +78,8 @@ async def detect_language_async(
     lang = None
     try:
         lang = await langdetect(content, session=session)
-    except:
+    except Exception as e:
+        raise e
         pass
 
     if lang:
@@ -93,12 +94,12 @@ def translate_text(
     to: Union[str, Lang] = Lang.AUTO,
     domain: Domain = Domain.COMMON,
     *,
-    session: ClientSession = None,
+    session: AsyncClient = None,
 ) -> str:
     return run_sync(translate_text_async(content, from_, to, domain, session=session))
 
 
 def detect_language(
-    content: str, /, *, session: ClientSession = None
+    content: str, /, *, session: AsyncClient = None
 ) -> Union[Lang, None]:
     return run_sync(detect_language_async(content, session=session))

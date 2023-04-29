@@ -14,7 +14,7 @@ setup(
     description='一个免费, 高效, 简洁百度翻译接口',
     long_description=description,
     long_description_content_type='text/markdown',
-    install_requires=['aiohttp', 'pycryptodome'],
+    install_requires=['httpx', 'pycryptodome'],
     project_urls={
         'Documentation': 'https://github.com/17097231932/baidu-translate#readme',
         'Code': 'https://github.com/17097231932/baidu-translate',
