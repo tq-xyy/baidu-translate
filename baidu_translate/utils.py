@@ -81,11 +81,7 @@ def environment(fn):
 
     def cache_need_refresh(refresh_time):
         nonlocal _cache_time
-        if (
-            not _cache
-            or not _cache_time
-            or (time.time() - _cache_time >= refresh_time)
-        ):
+        if not _cache or not _cache_time or (time.time() - _cache_time >= refresh_time):
             _cache_time = time.time()
             return True
         return False

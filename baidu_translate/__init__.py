@@ -48,9 +48,7 @@ async def translate_text_async(
         domain = Domain.COMMON
 
     if domain == Domain.COMMON:
-        result = await transapi(
-            content, fromLang.value, toLang.value, session=session
-        )
+        result = await transapi(content, fromLang.value, toLang.value, session=session)
     else:
         result = await v2transapi(
             content,
@@ -97,9 +95,7 @@ def translate_text(
     *,
     session: ClientSession = None,
 ) -> str:
-    return run_sync(
-        translate_text_async(content, from_, to, domain, session=session)
-    )
+    return run_sync(translate_text_async(content, from_, to, domain, session=session))
 
 
 def detect_language(

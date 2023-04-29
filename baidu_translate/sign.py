@@ -65,9 +65,7 @@ def acs_token(acs_sign_js: str, url: str, ua: str) -> str:
         SyntaxError,
         IndexError,
     ) as err:
-        bug_report = (
-            'https://github.com/17097231932/baidu-translate/issues/new/choose'
-        )
+        bug_report = 'https://github.com/17097231932/baidu-translate/issues/new/choose'
         raise NeedUpdate(
             'Can\'t get the secret key. '
             f'It is possible that Baidu has updated. To report bugs, please visit {bug_report}.'
@@ -75,12 +73,19 @@ def acs_token(acs_sign_js: str, url: str, ua: str) -> str:
     ts = math.floor(time.time() * 1000)
 
     data = json.dumps(
-        {'ua': ua, 'url': url, 'clientTs': ts, 'version': '1.0.0.6'},
+        {
+            0: "145672893382649882066085",
+            'ua': ua,
+            'platform': 'Win32',
+            'd1': '',
+            'd2': 0,
+            'clientTs': ts,
+            'odkp': 1,
+            'version': '1.1.0.3',
+        },
         separators=(',', ':'),
     )
 
-    cipher = AES.new(
-        arg1.encode('latin-1'), AES.MODE_CBC, arg2.encode('latin-1')
-    )
+    cipher = AES.new(arg1.encode('latin-1'), AES.MODE_CBC, arg2.encode('latin-1'))
     data = cipher.encrypt(pkcs7padding(data.encode('utf-8')))
     return arg0 + '_' + str(ts) + '_' + base64.b64encode(data).decode('utf-8')

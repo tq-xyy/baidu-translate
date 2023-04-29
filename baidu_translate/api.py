@@ -1,5 +1,6 @@
 import re
-from urllib.parse import quote_plus
+
+# from urllib.parse import quote_plus
 
 from aiohttp import ClientSession
 
@@ -51,9 +52,7 @@ async def _fetch_gtk_and_token(session: ClientSession):
 
 @environment
 async def _fetch_acs_sign_js(session: ClientSession):
-    resp = await session.get(
-        'https://dlswbr.baidu.com/heicha/mm/2060/acs-2060.js'
-    )
+    resp = await session.get('https://dlswbr.baidu.com/heicha/mm/2060/acs-2060.js')
     return await resp.text(), resp.request_info.headers['User-Agent']
 
 
@@ -99,10 +98,10 @@ async def v2transapi(
             'to': toLang,
         }
 
-        acs_sign_js, user_agent = await _fetch_acs_sign_js(session)
-        page = f'https://fanyi.baidu.com/#{fromLang}/{toLang}/{quote_plus(content)}'
+        # acs_sign_js, user_agent = await _fetch_acs_sign_js(session)
+        # page = f'https://fanyi.baidu.com/#{fromLang}/{toLang}/{quote_plus(content)}'
         headers = {
-            'Acs-Token': acs_token(acs_sign_js, page, user_agent),
+            # 'Acs-Token': acs_token(acs_sign_js, page, user_agent),
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         }
 
@@ -117,9 +116,7 @@ async def v2transapi(
         return V2TransapiResult(data)
 
 
-async def transapi(
-    content: str, fromLang: str, toLang: str, session: ClientSession
-):
+async def transapi(content: str, fromLang: str, toLang: str, session: ClientSession):
     await _fetch_cookie(session)
 
     data = {
@@ -130,9 +127,7 @@ async def transapi(
     }
 
     async with max_request_lock():
-        resp = await session.post(
-            'https://fanyi.baidu.com/transapi', data=data
-        )
+        resp = await session.post('https://fanyi.baidu.com/transapi', data=data)
         result = await resp.json()
 
         if result.get('type', None) == 1:
