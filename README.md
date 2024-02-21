@@ -13,7 +13,14 @@
 
 ## 安装
 
-本项目仍处于快速开发状态，未发布到 PYPI，你可以通过以下方法来安装。
+本项目已发布到 PYPI，你可以通过以下方法来安装。
+
+```sh
+$ pip install baidu-translate-api
+```
+> 注意安装包名为 `baidu-translate-api`，调用包名为 `baidu_translate`
+
+也可以用以下方式安装最新版：
 
 ```sh
 $ pip install git+https://github.com/17097239132/baidu-translate.git
